@@ -1,249 +1,133 @@
-<h1 align="center"> Digivice Api </h1>
+# Digivice API
 
-<hr>
+**API REST desenvolvida com Java 17 e Spring Boot 3.1.5 para consulta de informações sobre Digimon.**
 
-<p> A Digivice API é uma ferramenta que permite acessar informações sobre Digimons. Ela se integra a uma fonte externa de dados sobre essas criaturas digitais e oferece a flexibilidade de filtrar os resultados com base em critérios como nome e nível. Isso torna a consulta de informações sobre Digimons mais fácil e personalizável para atender às suas necessidades específicas.</p>
+A **Digivice API** é um projeto complementar ao [frontend Digivice](https://github.com/cesarrafaeljunior/digivice-frontend). Seu objetivo é consumir uma API pública de Digimon, disponibilizando dados por meio de um endpoint próprio com filtros por nome ou nível evolutivo.
 
-#### Tecnologias utilizadas:
- - Java 17.0.6
- - Spring Boot 3.1.5
- - Maven
- - IntelliJ
+**[Frontend Angular](https://github.com/cesarrafaeljunior/digivice-frontend)** · **[API no GitHub](https://github.com/cesarrafaeljunior/digivice-api)**
 
-### Tópicos
+## Funcionalidades
 
-- <a href="#local">Rodando localmente</a>
-- <a href="#doc">Documentação da api</a>
+- Consulta à API externa `https://digimon-api.vercel.app/api/digimon`.
+- Listagem geral de Digimon.
+- Consulta por nome.
+- Consulta por nível evolutivo.
+- Padronização da representação dos dados com `DigimonDTO`.
+- Conversão de determinados erros HTTP da fonte externa em respostas próprias da API.
 
-<hr>
+## Tecnologias
 
-###### local
-<h2 id="local">Rodando localmente</h2>
+- **Java 17**
+- **Spring Boot 3.1.5**
+- **Spring Web**
+- **RestTemplate** para requisições HTTP à fonte externa
+- **Maven** e Maven Wrapper
+- **Docker** (Dockerfile presente no repositório)
 
-- <a href="#linha_comando">Por linha de comando</a>
-- <a href="#docker" target="_blank">Utilizando o Docker</a>
+## Arquitetura e organização
 
+```text
+src/main/java/br/com/digivice/
+├── controller/
+│   └── DigimonController.java
+├── service/
+│   └── DigimonService.java
+├── DTO/
+│   └── DigimonDTO.java
+├── exceptions/
+│   ├── CustomExceptionHandler.java
+│   ├── EntityNotFoundException.java
+│   └── errors/
+│       └── StandardError.java
+└── DigiviceApplication.java
+```
 
-##### linha_comando
-<h2>Por linha de comando</h2>
+O controller recebe os parâmetros de consulta e delega ao serviço, responsável por recuperar dados externos. O DTO representa o contrato de resposta; o tratamento de exceções fornece respostas HTTP para erros conhecidos da fonte consultada.
 
-- Requisitos: É preciso ter o Maven e o JDK na versão 17 ou maior, instalados e configurados no sistema. 
+## Executando localmente
 
-### Clonando o repositório
-  - Faça o clone do seguinte repositório:
-    ``` bash
-    
-      git@github.com:cesarrafaeljunior/digivice_api.git
-    
-    ```
-    <hr>
-  - Abra a pasta do diretório utilizando o terminal/IDE, estando na raiz do projeto rode o comando para compilar o projeto:
-    ``` bash
-    
-      mvn spring-boot:run
-    
-    ```
-    <hr>
-  - A seguinte mensagem significa que a api está pronto para ser utilizada:
-    ``` bash
-    
-      2023-10-29T15:30:29.066-03:00  INFO 13788 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet : Completed initialization in 1 ms
-    
-    ```
-    <hr>
-  - Utilize o <a href="https://insomnia.rest/">Imsonia</a> ou qualquer outro software de chamadas HTTP para testar as rotas da API.
-  - <a href="#doc">Documentação da api</a>
+**Pré-requisitos:** JDK 17 e acesso à internet. O Maven Wrapper acompanha o repositório.
 
-##### docker
-<h2>Utilizando o Docker</h2>
-- Requisitos: É preciso ter o Docker instalado e configurado no sistema. 
+```bash
+git clone https://github.com/cesarrafaeljunior/digivice-api.git
+cd digivice-api
+./mvnw spring-boot:run
+```
 
-### Clonando o repositório
-  - Faça o clone do seguinte repositório:
-    ``` bash
-    
-      git@github.com:cesarrafaeljunior/digivice_api.git
-    
-    ```
-    <hr>
-    
-  - Após a compilação, rode o seginte comando para buildar a imagem do projeto a partir das configurações do aquivo Dockerfile:
-    ``` bash
-    
-       docker build -t myapp .
-    
-    ```
-    OBS: Este processo pode demorar alguns minutos.
-    
-    <hr>
-  - Suba um contâiner para rodar a imagem da aplicação utilizando o seguinte comando:
-    ``` bash
-    
-      docker run -p 8080:8080 myapp
-    
-    ```
-    <hr>
-  - Utilize o <a href="https://insomnia.rest/">Imsonia</a> ou qualquer outro software de chamadas HTTP para testar as rotas da API.
-  - <a href="#doc">Documentação da api</a>
+No Windows:
 
+```powershell
+.\mvnw.cmd spring-boot:run
+```
 
-<hr>
+Por padrão, o Spring Boot disponibiliza a API em `http://localhost:8080`.
 
-###### doc
-<h2 id="doc">Documentação da api</h2>
+### Executando com Docker
 
-## UrlsBase:
-  - Deploy: https://digivice-api.onrender.com => A primeira requisição pode demorar ate 10 segundos!
-  - Local: http://localhost:8080/digimons
+```bash
+docker build -t digivice-api .
+docker run --rm -p 8080:8080 digivice-api
+```
 
-### Requests
-- <a href="#all_digimons">Buscar todos os digimons</a>
-- <a href="#digimon_by_name">Buscar Digimon pelo nome</a>
-- <a href="#digimon_not_name">Buscar digimon com nome não existente</a>
-- <a href="#digimon_by_level">Buscar digimon por level</a>
-- <a href="#levels">Leveis disponíveis</a>
-- <a href="#not_levels">Buscar digimon com level não existente</a>
-- <a href="#level_and_name">Buscar Digimon pelo level e nome</a>
+Esses comandos utilizam o `Dockerfile` existente no repositório. O acesso à API pública externa continua necessário para que a consulta retorne informações.
 
-### Digimons
+## Endpoints
 
-###### all_digimons
-<h2 id="all_digimons">Buscar todos os digimons</h2>
+O controller disponibiliza um endpoint HTTP `GET /digimons` com parâmetros opcionais:
 
-`GET /digimons - FORMATO DE RESPOSTA- Status Code - 200`
-<P>Exemplo de resposta</p>
+| Requisição | Finalidade |
+| --- | --- |
+| `GET /digimons` | Listar todos os Digimon |
+| `GET /digimons?name=Koromon` | Buscar pelo nome |
+| `GET /digimons?level=Ultimate` | Filtrar por nível |
+
+Exemplos:
+
+```bash
+curl 'http://localhost:8080/digimons'
+curl 'http://localhost:8080/digimons?name=Koromon'
+curl 'http://localhost:8080/digimons?level=Ultimate'
+```
+
+Quando `name` e `level` são enviados simultaneamente, **a implementação atual dá prioridade a `name`**; os filtros não são combinados.
+
+### Estrutura básica da resposta
 
 ```json
 [
-   {
-     "name": "Koromon",
-     "img": "https://digimon.shadowsmith.com/img/koromon.jpg",
-     "level": "In Training"
-   },
-   {
-     "name": "Tsunomon",
-     "img": "https://digimon.shadowsmith.com/img/tsunomon.jpg",
-     "level": "In Training"
-   },
-   {
-     "name": "Yokomon",
-     "img": "https://digimon.shadowsmith.com/img/yokomon.jpg",
-     "level": "In Training"
-   },
+  {
+    "name": "Koromon",
+    "img": "https://digimon.shadowsmith.com/img/koromon.jpg",
+    "level": "In Training"
+  }
 ]
 ```
 
-<hr>
+O exemplo acima ilustra o contrato presente no projeto. Os dados e endereços de imagem efetivamente retornados dependem da API externa.
 
-###### digimon_by_name
-<h2 id="digimon_by_name">Buscar Digimon pelo nome</h2>
+### Tratamento de erros
 
-`GET /digimons?name=Koromon - FORMATO DE RESPOSTA- Status Code - 200`
-<P>Exemplo de resposta</p>
+A API contém um `@ControllerAdvice` para tratar `EntityNotFoundException`, incluindo dados como instante, status HTTP, mensagem de erro e caminho da requisição. Falhas de rede e indisponibilidade do serviço externo podem exigir tratamento adicional.
 
-```json
-[
-   {
-     "name": "Koromon",
-     "img": "https://digimon.shadowsmith.com/img/koromon.jpg",
-     "level": "In Training"
-   }
-]
-```
+## Relação com o frontend
 
-<hr>
+O frontend Angular está disponível em:
 
-###### digimon_not_name
-<h2 id="digimon_not_name">Buscar Digimon com nome não existente</h2>
+**[cesarrafaeljunior/digivice-frontend](https://github.com/cesarrafaeljunior/digivice-frontend)**
 
-`GET /digimons?name=pikachu - FORMATO DE RESPOSTA- Status Code - 400`
-<P>Exemplo de resposta</p>
+**Nota de integração:** a versão atual do frontend consulta a API pública `digimon-api.vercel.app` diretamente. Portanto, executar esta API Spring Boot não altera automaticamente a fonte de dados do site. Para integrar os projetos, é necessário configurar a URL de consulta no frontend e validar o contrato de dados, CORS e tratamento de falhas.
 
-```json
-{
-   "timestamp": "2023-10-30T03:10:02.850076Z",
-   "status": "BAD_REQUEST",
-   "error": "Pikachu is not a Digimon in our database.",
-   "path": "/digimons"
-}
-```
+## Pontos de evolução técnica
 
-<hr>
+- Externalizar a URL da API de terceiros para configuração por ambiente.
+- Evitar a modificação de um campo compartilhado de URL no serviço durante consultas. Em acessos concorrentes, essa abordagem pode gerar requisições incorretas; construir URLs como variáveis locais é mais seguro.
+- Melhorar o tratamento de indisponibilidade, timeout e erros inesperados da fonte externa.
+- Adicionar testes automatizados específicos dos endpoints e do serviço de integração.
 
-###### digimon_by_level
-<h2 id="digimon_by_level">Buscar digimons por level</h2>
+## Aviso
 
-<h2>Leveis disponíveis</h2>
+Projeto **não oficial**, desenvolvido com finalidade educacional. Digimon e as imagens das criaturas pertencem aos respectivos titulares de direitos. Não há vínculo com os detentores da marca.
 
-###### levels
+---
 
-- In Training
-- Rookie
-- Champion
-- Ultimate
-- Fresh
-- Mega
-- Armor
-  
-`GET /digimons?level=armor - FORMATO DE RESPOSTA- Status Code - 200`
-<P>Exemplo de resposta</p>
-
-```json
-[
-   {
-     "name": "Flamedramon",
-     "img": "https://digimon.shadowsmith.com/img/flamedramon.jpg",
-     "level": "Armor"
-   },
-   {
-     "name": "Raidramon",
-     "img": "https://digimon.shadowsmith.com/img/raidramon.jpg",
-     "level": "Armor"
-   },
-   {
-     "name": "Magnamon",
-     "img": "https://digimon.shadowsmith.com/img/magnamon.jpg",
-     "level": "Armor"
-   },
-   {
-     "name": "Sethmon",
-     "img": "https://digimon.shadowsmith.com/img/sethmon.jpg",
-     "level": "Armor"
-   },
-]
-```
-
-<hr>
-
-###### not_levels
-<h2 id="not_level">Buscar Digimons com level não existente</h2>
-
-`GET /digimons?level=big - FORMATO DE RESPOSTA- Status Code - 400`
-<P>Exemplo de resposta</p>
-
-```json
-{
-   "timestamp": "2023-10-30T03:14:34.160189300Z",
-   "status": "BAD_REQUEST",
-   "error": "Big is not a level in our database.",
-   "path": "/digimons"
-}
-```
-
-###### level_and_name
-
-<h2 id="level_and_name">Buscar Digimon pelo level e nome</h2>
-
-`GET /digimons?level=rookie&name=agumon - FORMATO DE RESPOSTA- Status Code - 200`
-<P>Exemplo de resposta</p>
-
-```json
-[
-   {
-     "name": "Agumon",
-     "img": "https://digimon.shadowsmith.com/img/agumon.jpg",
-     "level": "Rookie"
-   }
-]
-```
-<hr>
+**Desenvolvido por [César Rafael](https://github.com/cesarrafaeljunior).**
